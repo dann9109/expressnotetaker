@@ -43,12 +43,7 @@ app.post('/api/notes', (req, res) => {
 
     newNote.id = uuidv4();
 
-    // fs.readFile('db.json', 'utf8', (err, data) => {
-    //     if (err) {
-    //         console.log(err);
-    //         return res.status(500).json({ error: 'Failed to read the notes.' });
-    //     }
-    //const notes = JSON.parse(newNote);
+
     database.push(newNote);
 
     fs.writeFileSync('./db/db.json', JSON.stringify(database), (err) => {
@@ -64,26 +59,30 @@ app.post('/api/notes', (req, res) => {
     // });
 });
 
-// app.delete('/api/notes/:id', (req, res) => {
-//     const noteId = req.params.id;
+app.delete('/api/notes/:id', (req, res) => {
+    const noteId = req.params.id;
 
-//     fs.readFile('db.json', 'utf8', (err, data) => {
-//         if (err) {
-//             console.log(err);
-//             return res.status(500).json({ error: 'Failed to read the notes.' });
-//         }
-//         const notes = JSON.parse(data);
-//         const updatedNotes = notes.filter((note) => note.id !== noteId);
+    fs.readFile('./db/db.json', 'utf8', (err, data) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to read the notes.' });
+        }
+        const notes = JSON.parse(data);
+        const updatedNotes = notes.filter((note) => note.id !== noteId);
 
-//         fs.writeFile('db.json', JSON.stringify(updatedNotes), (err) => {
-//             if (err) {
-//                 console.log(err);
-//                 return res.status(500).json({ error: 'Failed to delete the note.' });
-//             }
-//             res.json({ message: 'Note deleted successfully.' });
-//         });
-//     });
-// });
+        fs.writeFile('./db/db.json', JSON.stringify(updatedNotes), (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ error: 'Failed to delete the note.' });
+            }
+
+            // Update the database variable with the updated notes
+            database = updatedNotes;
+
+            res.json({ message: 'Note deleted successfully.' });
+        });
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on:${PORT}`);
